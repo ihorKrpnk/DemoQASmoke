@@ -2,16 +2,21 @@ import TestRail.TestRailApiCalls;
 import com.google.common.base.Throwables;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import io.qameta.allure.TmsLink;
+import io.qameta.allure.TmsLinks;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static TestRail.TestRailApiCalls.addResultToCase;
 import static org.testng.ITestResult.*;
@@ -38,7 +43,6 @@ public class BaseTest {
 
     @BeforeTest
     public void setUp() {
-
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.get(url);
@@ -46,27 +50,36 @@ public class BaseTest {
     }
 
 
-    @AfterTest
-    public void tearDown(ITestResult result, Method method){
-        driver.quit();
+    @AfterMethod
+    public void setTestRailStatus(ITestResult result, Method method){
         Map<String, Object> data = new HashMap<>();
-        String testCaseId = getTestCaseId(method);
-        String runID = AUTOMATION_RUN_ID;
+        List<String> testCaseIds = getTestCaseIds(method);
         if (result.getStatus() == FAILURE) {
             data.put("status_id", 5);
             data.put("comment",  " \n" + Throwables.getStackTraceAsString(result.getThrowable()));
-            addResultToCase(runID, testCaseId, data);
         } else if (result.getStatus() == SUCCESS) {
             data.put("status_id", 1);
-            addResultToCase(runID, testCaseId, data);
         } else if (result.getStatus() == SKIP) {
             data.put("status_id", 8);
-            addResultToCase(runID, testCaseId, data);
         }
+        testCaseIds.forEach(testCaseId ->addResultToCase(AUTOMATION_RUN_ID, testCaseId, data));
     }
 
-    private String  getTestCaseId(Method method) {
-        return  method.getAnnotation(TmsLink.class).value();
+    @AfterTest
+    public void afterTest() {
+        driver.quit();
+    }
+
+    private List<String> getTestCaseIds(Method method) {
+        List<String> testCaseIds = null;
+        if (method.isAnnotationPresent(TmsLink.class)) {
+            testCaseIds = List.of(method.getAnnotation(TmsLink.class).value().split(","));
+        } else if (method.isAnnotationPresent(TmsLinks.class)) {
+            testCaseIds = Arrays.stream(method.getAnnotation(TmsLinks.class).value())
+                    .map(TmsLink::value)
+                    .collect(Collectors.toUnmodifiableList());
+        }
+        return testCaseIds;
     }
 
 }
