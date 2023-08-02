@@ -18,22 +18,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 
-public class LoginSearchAddOpenDeleteBookTests {
+public class LoginSearchAddOpenDeleteBookTests extends BaseTest {
 
-    protected WebDriver driver;
-    private String url = "https://demoqa.com/login";
-
-    public static final String USER_NAME = "demoqatest2";
-    public static final String PASSWORD = "Demoqatest1!";
-
-    @BeforeTest
-    public void setUp() {
-
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.get(url);
-        driver.manage().window().maximize();
-    }
 
    /* @TmsLink("39342")
     @Test(description = "Register New User [Test ID - C39342]")
@@ -281,10 +267,6 @@ public class LoginSearchAddOpenDeleteBookTests {
     }
 
 
-    @AfterTest
-    public void closeBrowser() {
-        driver.quit();
-    }
 
 
 }
