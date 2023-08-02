@@ -51,18 +51,18 @@ public class BaseTest {
 
 
     @AfterMethod
-    public void setTestRailStatus(ITestResult result, Method method){
+    public void setTestRailStatus(ITestResult result, Method method) {
         Map<String, Object> data = new HashMap<>();
         List<String> testCaseIds = getTestCaseIds(method);
         if (result.getStatus() == FAILURE) {
             data.put("status_id", 5);
-            data.put("comment",  " \n" + Throwables.getStackTraceAsString(result.getThrowable()));
+            data.put("comment", " \n" + Throwables.getStackTraceAsString(result.getThrowable()));
         } else if (result.getStatus() == SUCCESS) {
             data.put("status_id", 1);
         } else if (result.getStatus() == SKIP) {
             data.put("status_id", 8);
         }
-        testCaseIds.forEach(testCaseId ->addResultToCase(AUTOMATION_RUN_ID, testCaseId, data));
+        testCaseIds.forEach(testCaseId -> addResultToCase(AUTOMATION_RUN_ID, testCaseId, data));
     }
 
     @AfterTest
@@ -81,5 +81,4 @@ public class BaseTest {
         }
         return testCaseIds;
     }
-
 }
