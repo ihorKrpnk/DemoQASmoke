@@ -50,13 +50,11 @@ public class BaseTest {
 
 
     @AfterTest
-    public void tearDown(ITestResult result, ITestNGMethod method){
+    public void tearDown(ITestResult result){
         driver.quit();
         Map<String, Object> data = new HashMap<>();
-        String testCaseId = getTestCaseId(method);
-        String runID =
-//                        manualTestCaseIdPresent ? CASE_ID_RUN_ID_OF_CURRENT_TEST_PLAN.get(Integer.parseInt(testCaseId)) :
-                AUTOMATION_RUN_ID;
+        String testCaseId = getTestCaseId(result.getMethod());
+        String runID = AUTOMATION_RUN_ID;
         if (result.getStatus() == FAILURE) {
             data.put("status_id", 5);
             data.put("comment",  " \n" + Throwables.getStackTraceAsString(result.getThrowable()));
