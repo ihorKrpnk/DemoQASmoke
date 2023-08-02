@@ -4,19 +4,16 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import io.qameta.allure.TmsLink;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import static TestRail.TestRailApiCalls.addResultToCase;
-import static java.util.Objects.requireNonNull;
 import static org.testng.ITestResult.*;
 
 public class BaseTest {
@@ -50,10 +47,10 @@ public class BaseTest {
 
 
     @AfterTest
-    public void tearDown(ITestResult result){
+    public void tearDown(ITestResult result, Method method){
         driver.quit();
         Map<String, Object> data = new HashMap<>();
-        String testCaseId = getTestCaseId(result.getMethod());
+        String testCaseId = getTestCaseId(method);
         String runID = AUTOMATION_RUN_ID;
         if (result.getStatus() == FAILURE) {
             data.put("status_id", 5);
@@ -68,11 +65,8 @@ public class BaseTest {
         }
     }
 
-    private String  getTestCaseId(ITestNGMethod method) {
-        Annotation[] declaredAnnotations = method.getConstructorOrMethod().getMethod().getDeclaredAnnotations();
-        TmsLink tmsLink = (TmsLink) Arrays.stream(declaredAnnotations).
-                filter(a -> a.annotationType().equals(TmsLink.class)).findFirst().orElse(null);
-        return tmsLink.value();
+    private String  getTestCaseId(Method method) {
+        return  method.getAnnotation(TmsLink.class).value();
     }
 
 }
